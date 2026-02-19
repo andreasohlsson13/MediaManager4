@@ -44,4 +44,3 @@ jobs:
         with:
           name: MediaManager4-Windows
           path: dist/MediaManager4.exe
-
