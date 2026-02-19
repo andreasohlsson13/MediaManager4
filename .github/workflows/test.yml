@@ -1,5 +1,10 @@
-name: Disabled
+name: Disabled test workflow
 
-on: []   # ingen trigger, workflow körs aldrig
+on:
+  workflow_dispatch:
 
-jobs: {}
+jobs:
+  noop:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "disabled"
