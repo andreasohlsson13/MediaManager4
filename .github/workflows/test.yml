@@ -1,2 +1,5 @@
+name: Disabled
 
-# disabled
+on: []   # ingen trigger, workflow körs aldrig
+
+jobs: {}
