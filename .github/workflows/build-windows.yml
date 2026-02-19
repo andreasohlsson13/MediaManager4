@@ -1,1 +1,47 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller mutagen pillow
+
+      - name: Download FFmpeg
+        shell: pwsh
+        run: |
+          $url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
+          Invoke-WebRequest -Uri $url -OutFile "ffmpeg.zip"
+          Expand-Archive -Path "ffmpeg.zip" -DestinationPath "ffmpeg" -Force
+
+          $ffmpeg = Get-ChildItem -Path "ffmpeg" -Recurse -Filter "ffmpeg.exe" | Select-Object -First 1
+          $ffprobe = Get-ChildItem -Path "ffmpeg" -Recurse -Filter "ffprobe.exe" | Select-Object -First 1
+
+          New-Item -ItemType Directory -Force -Path "tools" | Out-Null
+          Copy-Item $ffmpeg.FullName "tools\ffmpeg.exe"
+          Copy-Item $ffprobe.FullName "tools\ffprobe.exe"
+
+      - name: Build
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean --onefile --windowed --name "MediaManager4" `
+            --add-binary "tools\ffmpeg.exe;tools" `
+            --add-binary "tools\ffprobe.exe;tools" `
+            MediaManager4.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MediaManager4-Windows
+          path: dist/MediaManager4.exe
 
